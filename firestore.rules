@@ -1,0 +1,333 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================
+    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    // ============================================
+
+    // Проверка авторизации
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Проверка, является ли пользователь создателем документа
+    // userIdField - имя поля в документе, где хранится ID создателя
+    function isCreator(userIdField) {
+      return isAuthenticated() && request.auth.uid == resource.data[userIdField];
+    }
+
+    // Список супер-админов
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email.matches('.*@amregroup.kz') ||
+        request.auth.token.email == 'kadeshov@gmail.com' ||
+        request.auth.token.email == 'almaskadeshov@gmail.com' ||
+        request.auth.token.email == 'kaidarov.api@gmail.com' ||
+        request.auth.token.email == '87774037693and@gmail.com'
+      );
+    }
+
+    // ============================================
+    // ПОЛЬЗОВАТЕЛИ (профили)
+    // ============================================
+    match /users/{userId} {
+      // Пользователь может читать и писать свой профиль
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      // Админы могут читать/писать всех
+      allow read, write: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ПРОЕКТЫ
+    // ============================================
+    match /projects/{projectId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // СОТРУДНИКИ
+    // ============================================
+    match /employees/{employeeId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ТАБЕЛЬ / ПОСЕЩАЕМОСТЬ
+    // ============================================
+    match /attendance/{recordId} {
+      // Все авторизованные могут читать
+      allow read: if isAuthenticated();
+      // Создавать записи могут все авторизованные (чекин с телефона)
+      allow create: if isAuthenticated();
+      // Редактировать/удалять только админы
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ВДЦ (Ведомость дефектов и комплектации)
+    // ============================================
+    match /vdc/{vdcId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ЗАПРОСЫ КП
+    // ============================================
+    match /kp_requests/{requestId} {
+      allow read: if isAuthenticated();
+      // Все авторизованные могут создавать запросы КП
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ПРИГЛАШЕНИЯ КП (для поставщиков)
+    // ============================================
+    match /kp_invitations/{invitationId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ОТВЕТЫ НА КП
+    // ============================================
+    match /kp_responses/{responseId} {
+      // Исправлена уязвимость: требование авторизации для создания
+      allow create: if isAuthenticated();
+      // Читать и редактировать только авторизованные
+      allow read, update, delete: if isAuthenticated();
+    }
+
+    // ============================================
+    // КП (Коммерческие предложения)
+    // ============================================
+    match /kp/{kpId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ЗАКАЗЫ
+    // ============================================
+    match /orders/{orderId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ПОСТАВЩИКИ
+    // ============================================
+    match /suppliers/{supplierId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ПРИХОДЫ
+    // ============================================
+    match /incoming/{incomingId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ОБЪЕКТЫ (для QR-кодов)
+    // ============================================
+    match /objects/{objectId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ПРЕДЛОЖЕНИЯ ПОСТАВЩИКОВ (для альтернатив)
+    // ============================================
+    match /supplierOffers/{offerId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ЦЕНОВОЙ АНАЛИЗ - ПРОЕКТЫ В РАСЧЁТЕ
+    // ============================================
+    match /projectEstimates/{estimateId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin() || isCreator('createdBy');
+    }
+
+    // ============================================
+    // ЦЕНОВОЙ АНАЛИЗ - ПОЗИЦИИ РАСЧЁТА
+    // ============================================
+    match /estimatePositions/{positionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin() || isCreator('createdBy');
+    }
+
+    // ============================================
+    // ЦЕНОВОЙ АНАЛИЗ - ЗАЯВКИ ПОСТАВЩИКАМ
+    // ============================================
+    match /supplierRequests/{requestId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin() || isCreator('createdBy');
+    }
+
+    // ============================================
+    // ФИНАНСЫ (ТРАНЗАКЦИИ)
+    // ============================================
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin() || isCreator('createdBy');
+    }
+
+    // ============================================
+    // ЦЕНОВОЙ АНАЛИЗ - ОТВЕТЫ ПОСТАВЩИКОВ
+    // ============================================
+    match /supplierResponses/{responseId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin() || isCreator('createdBy');
+    }
+
+    // ============================================
+    // АВТО-ПРАВИЛА КАТЕГОРИЗАЦИИ
+    // ============================================
+    match /autoRules/{ruleId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ЗАРПЛАТНЫЕ ВЕДОМОСТИ
+    // ============================================
+    match /payroll/{recordId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // СТАТЬИ РАСХОДОВ/ДОХОДОВ (legacy)
+    // ============================================
+    match /costItems/{itemId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // СЧЕТА (Finance v2.0)
+    // ============================================
+    match /accounts/{accountId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // КАТЕГОРИИ (Finance v2.0, замена costItems)
+    // ============================================
+    match /categories/{categoryId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ТЕГИ (Finance v2.0)
+    // ============================================
+    match /tags/{tagId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // БЮДЖЕТНЫЕ ПЛАНЫ (Finance v2.0)
+    // ============================================
+    match /budgetPlans/{planId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ЗАПИСИ БАЛАНСА (Finance v2.0)
+    // ============================================
+    match /balanceEntries/{entryId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // КОНТРАГЕНТЫ (ПАРТНЁРЫ)
+    // ============================================
+    match /partners/{partnerId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ЖИЛЫЕ КОМПЛЕКСЫ (ЖК)
+    // ============================================
+    match /residential_complexes/{complexId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // РЕЕСТР ДОКУМЕНТОВ ПО ПРОЕКТАМ
+    // ============================================
+    match /project_document_packages/{packageId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    match /project_documents/{documentId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // ============================================
+    // ГПР (ГРАФИК ПРОИЗВОДСТВА РАБОТ)
+    // ============================================
+
+    // Главная коллекция ГПР
+    match /gprs/{gprId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // Блоки ГПР
+    match /gpr_blocks/{blockId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // Задачи ГПР
+    match /gpr_tasks/{taskId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isSuperAdmin();
+
+      // Ответственный может обновлять только статус и даты
+      allow update: if isSuperAdmin() || (
+        isAuthenticated() &&
+        request.auth.uid == resource.data.responsibleId &&
+        // Проверяем, что изменяются только разрешённые поля
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'actualStart', 'actualEnd', 'delayReason', 'statusHistory', 'updatedAt', 'version']) &&
+        // Оптимистичная блокировка: версия инкрементируется
+        request.resource.data.version == resource.data.version + 1
+      );
+    }
+
+    // Шаблоны ГПР
+    match /gpr_templates/{templateId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+  }
+}
