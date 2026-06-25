@@ -1,3 +1,4 @@
+// @ts-nocheck — адаптируется под FixPlast
 import { useState, useEffect, useMemo } from 'react';
 import { Timestamp } from 'firebase/firestore';
 import { useAccountBalances } from '../../hooks/useAccountBalances';

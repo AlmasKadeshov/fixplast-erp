@@ -21,11 +21,9 @@ service cloud.firestore {
     // Список супер-админов
     function isSuperAdmin() {
       return isAuthenticated() && (
-        request.auth.token.email.matches('.*@amregroup.kz') ||
-        request.auth.token.email == 'kadeshov@gmail.com' ||
+        request.auth.token.email.matches('.*@fixplast.kz') ||
         request.auth.token.email == 'almaskadeshov@gmail.com' ||
-        request.auth.token.email == 'kaidarov.api@gmail.com' ||
-        request.auth.token.email == '87774037693and@gmail.com'
+        request.auth.token.email == 'admin@fixplast.kz'
       );
     }
 

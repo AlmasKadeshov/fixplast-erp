@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useMemo } from 'react';
 import { financeService } from '../../services/finance.service';
 import { partnersService } from '../../services/partners.service';

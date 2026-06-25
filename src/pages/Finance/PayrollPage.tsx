@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';

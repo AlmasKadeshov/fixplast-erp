@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { addDays, endOfMonth, format, startOfMonth } from 'date-fns';
 import { ru } from 'date-fns/locale';

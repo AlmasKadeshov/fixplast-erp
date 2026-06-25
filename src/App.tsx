@@ -18,6 +18,7 @@ const VDC = lazy(() => import('./pages/VDC').then(m => ({ default: m.VDC })));
 const PriceAnalysis = lazy(() => import('./pages/PriceAnalysis').then(m => ({ default: m.PriceAnalysis })));
 const ProjectEstimate = lazy(() => import('./pages/PriceAnalysis/ProjectEstimate').then(m => ({ default: m.ProjectEstimate })));
 const FinanceLayout = lazy(() => import('./pages/Finance/FinanceLayout').then(m => ({ default: m.FinanceLayout })));
+const MobileExecutiveDashboard = lazy(() => import('./pages/Finance/MobileExecutiveDashboard').then(m => ({ default: m.MobileExecutiveDashboard })));
 const ImportPage = lazy(() => import('./pages/Finance/ImportPage').then(m => ({ default: m.ImportPage })));
 const CashflowPage = lazy(() => import('./pages/Finance/CashflowPage').then(m => ({ default: m.CashflowPage })));
 const PnLPage = lazy(() => import('./pages/Finance/PnLPage').then(m => ({ default: m.PnLPage })));
@@ -144,7 +145,11 @@ function App() {
             >
               <Route
                 index
-                element={<Navigate to="/finance" replace />}
+                element={
+                  <Suspense fallback={<AppLoader />}>
+                    <MobileExecutiveDashboard />
+                  </Suspense>
+                }
               />
               <Route
                 path="projects"

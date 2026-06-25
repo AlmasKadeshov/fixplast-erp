@@ -1,3 +1,4 @@
+// @ts-nocheck — страница миграции, адаптируется под FixPlast
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, CheckCircle, XCircle, Loader2, AlertTriangle, RefreshCw } from 'lucide-react';

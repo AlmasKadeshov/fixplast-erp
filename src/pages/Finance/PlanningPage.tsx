@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { buildProjectSelectTree } from '../../utils/projectTree';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';

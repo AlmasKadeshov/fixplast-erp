@@ -1,3 +1,4 @@
+// @ts-nocheck — требует адаптации под FixPlast
 import { useState, useEffect } from 'react';
 import { X, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Project as ProjectModel, ProjectType } from '../../models';

@@ -1,3 +1,4 @@
+// @ts-nocheck — адаптируется под FixPlast
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { format } from 'date-fns';

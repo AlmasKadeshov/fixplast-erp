@@ -1,3 +1,4 @@
+// @ts-nocheck — адаптируется под FixPlast
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   addMonths,

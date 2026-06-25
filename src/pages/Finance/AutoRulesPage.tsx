@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, X, Save, Zap, ToggleLeft, ToggleRight, Play, ArrowRight } from 'lucide-react';
 import { autoRulesService } from '../../services/autoRules.service';

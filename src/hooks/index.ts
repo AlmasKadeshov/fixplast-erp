@@ -1,4 +1,4 @@
-export { useAuth } from './useAuth';
+export { useAuth } from '../contexts/AuthContext';
 export { useAccountBalances } from './useAccountBalances';
 export { useAccounts } from './useAccounts';
 export { useCategories } from './useCategories';
