@@ -23,8 +23,8 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 // Права доступа по ролям
 const MODULE_ACCESS: Record<UserRole, string[]> = {
-  owner: ['/finance', '/directories', '/projects', '/employees', '/supply'],
-  director: ['/finance', '/directories', '/projects'],
+  owner: ['/finance', '/directories', '/projects', '/employees', '/supply', '/import'],
+  director: ['/finance', '/directories', '/projects', '/import'],
   accountant: ['/finance', '/directories'],
   manager: ['/finance', '/projects'],
   engineer: ['/projects'],

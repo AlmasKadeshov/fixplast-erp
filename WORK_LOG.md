@@ -179,3 +179,51 @@ npm run dev
 
 - Алмас (Kadeshov) — almaskadeshov@gmail.com
 - Проект: Fix Plast Group, Астана, производство пластиковых изделий
+
+---
+
+## 2026-06-28 — Модуль импорта xlsx (Claude)
+
+### Что сделано
+
+**Удалено:**
+- `scripts/seed/` — старые seed-скрипты (firebase-admin, import-*.ts, seed-all.ts)
+- `seed-data/` — папка с CSV-заглушками
+- `npm run seed` убран из package.json
+- `ts-node` убран из devDependencies
+
+**Добавлено:**
+- `react-dropzone` в dependencies
+
+**Новые файлы:**
+- `src/services/import/types.ts` — типы SheetType, RecognizedSheet, MappedSheet, ImportResult, ImportStatus
+- `src/services/import/sheetConfigs.ts` — конфигурации 9 листов с сигнатурами распознавания
+- `src/services/import/xlsxParser.ts` — парсер xlsx: находит заголовки, распознаёт листы по имени/сигнатуре
+- `src/services/import/mappers/utils.ts` — parseDate, parseNumber, parseStr, hashString
+- `src/services/import/mappers/journalBankMapper.ts` → `transactions` (с FNV-1a дедупликацией)
+- `src/services/import/mappers/sdelkiMapper.ts` → `walletOperations`
+- `src/services/import/mappers/spravochnikiMapper.ts` → `categories`, `wallets`, `operationTypes`, `cashflowSections`
+- `src/services/import/mappers/salesMapper.ts` → `sales` (юрлица и физлица)
+- `src/services/import/mappers/ostatkiMapper.ts` → `accountBalances`
+- `src/services/import/mappers/zaymyMapper.ts` → `loans`
+- `src/services/import/mappers/fixedAssetsMapper.ts` → `fixedAssets`
+- `src/services/import/mappers/sebestoimostMapper.ts` → `rawCostData`
+- `src/services/import/mappers/index.ts` — маршрутизация по типу листа
+- `src/services/import/firestoreWriter.ts` — batched writes (по 499), дедупликация транзакций, progress callback
+- `src/services/import/index.ts` — публичный API модуля
+- `src/pages/Import/ImportPage.tsx` — полноценная страница импорта: drag-drop, список листов с галочками, превью первых 10 строк, прогресс, отчёт
+
+**Обновлено:**
+- `src/contexts/AuthContext.tsx` — `/import` добавлен в MODULE_ACCESS для owner/director
+- `src/components/layout/Sidebar.tsx` — пункт "Импорт данных" для owner/director
+- `src/App.tsx` — маршрут `/import` + редирект `/finance/import` → `/import`
+- `src/pages/Finance/MobileExecutiveDashboard.tsx` — empty state теперь ссылается на `/import`
+
+### Решения
+
+1. **react-dropzone вместо нативного input** — для drag-and-drop зоны.
+2. **Двухэтапное распознавание листов**: сначала по имени (нечувствительно к регистру), потом по сигнатуре заголовков.
+3. **hashString (FNV-1a)** вместо MD5 — нет зависимости, достаточно для дедупликации транзакций.
+4. **Batched writes по 499** — лимит Firestore 500, минус 1 для безопасности.
+5. **getDoc перед set** только для транзакций с явным id — пропускаем дубли без лишних чтений.
+6. **Справочники** обрабатываются поколоночно, а не построчно.

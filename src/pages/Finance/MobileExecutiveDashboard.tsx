@@ -304,7 +304,12 @@ export function MobileExecutiveDashboard() {
             <div className="flex flex-col items-center justify-center h-40 text-center">
               <BarChart3 className="w-10 h-10 text-gray-200 mb-3" />
               <p className="text-sm text-gray-400 font-medium">Нет данных</p>
-              <p className="text-xs text-gray-300 mt-1">Загрузите CSV-файлы и запустите npm run seed</p>
+              <button
+                onClick={() => navigate('/import')}
+                className="mt-2 text-xs text-blue-500 hover:text-blue-700 underline"
+              >
+                Импортировать данные →
+              </button>
             </div>
           ) : loading ? (
             <div className="h-40 skeleton rounded-xl" />
@@ -348,7 +353,12 @@ export function MobileExecutiveDashboard() {
           ) : recentTx.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-24 text-center">
               <p className="text-sm text-gray-400">Транзакций пока нет</p>
-              <p className="text-xs text-gray-300 mt-1">Загрузите CSV и запустите seed</p>
+              <button
+                onClick={() => navigate('/import')}
+                className="mt-1 text-xs text-blue-500 hover:text-blue-700 underline"
+              >
+                Импортировать данные →
+              </button>
             </div>
           ) : (
             <div className="space-y-2">

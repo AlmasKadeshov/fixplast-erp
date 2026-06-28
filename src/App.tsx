@@ -19,7 +19,7 @@ const PriceAnalysis = lazy(() => import('./pages/PriceAnalysis').then(m => ({ de
 const ProjectEstimate = lazy(() => import('./pages/PriceAnalysis/ProjectEstimate').then(m => ({ default: m.ProjectEstimate })));
 const FinanceLayout = lazy(() => import('./pages/Finance/FinanceLayout').then(m => ({ default: m.FinanceLayout })));
 const MobileExecutiveDashboard = lazy(() => import('./pages/Finance/MobileExecutiveDashboard').then(m => ({ default: m.MobileExecutiveDashboard })));
-const ImportPage = lazy(() => import('./pages/Finance/ImportPage').then(m => ({ default: m.ImportPage })));
+const ImportPage = lazy(() => import('./pages/Import/ImportPage').then(m => ({ default: m.ImportPage })));
 const CashflowPage = lazy(() => import('./pages/Finance/CashflowPage').then(m => ({ default: m.CashflowPage })));
 const PnLPage = lazy(() => import('./pages/Finance/PnLPage').then(m => ({ default: m.PnLPage })));
 const TransactionsPage = lazy(() => import('./pages/Finance/TransactionsPage').then(m => ({ default: m.TransactionsPage })));
@@ -152,6 +152,14 @@ function App() {
                 }
               />
               <Route
+                path="import"
+                element={
+                  <Suspense fallback={<AppLoader />}>
+                    <ImportPage />
+                  </Suspense>
+                }
+              />
+              <Route
                 path="projects"
                 element={
                   <Suspense fallback={<AppLoader />}>
@@ -206,11 +214,7 @@ function App() {
                 } />
                 <Route
                   path="import"
-                  element={
-                    <Suspense fallback={<AppLoader />}>
-                      <ImportPage />
-                    </Suspense>
-                  }
+                  element={<Navigate to="/import" replace />}
                 />
                 <Route
                   path="planning"

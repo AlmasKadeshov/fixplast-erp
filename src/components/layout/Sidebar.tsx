@@ -6,6 +6,7 @@ import {
   X,
   ChevronRight,
   BookOpen,
+  Upload,
 } from 'lucide-react';
 import { useAuth, hasAccessToModule } from '../../contexts/AuthContext';
 
@@ -16,6 +17,7 @@ interface SidebarProps {
 
 const allNavItems = [
   { path: '/finance', label: 'Финансы', icon: Wallet },
+  { path: '/import', label: 'Импорт данных', icon: Upload },
   { path: '/directories', label: 'Справочники', icon: BookOpen },
   // Временно скрыты на время разработки Finance v2.0
   // { path: '/projects', label: 'Проекты', icon: FolderKanban },
