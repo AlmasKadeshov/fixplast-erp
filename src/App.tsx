@@ -19,8 +19,14 @@ const PriceAnalysis = lazy(() => import('./pages/PriceAnalysis').then(m => ({ de
 const ProjectEstimate = lazy(() => import('./pages/PriceAnalysis/ProjectEstimate').then(m => ({ default: m.ProjectEstimate })));
 const FinanceLayout = lazy(() => import('./pages/Finance/FinanceLayout').then(m => ({ default: m.FinanceLayout })));
 const MobileExecutiveDashboard = lazy(() => import('./pages/Finance/MobileExecutiveDashboard').then(m => ({ default: m.MobileExecutiveDashboard })));
+const ReportsShell = lazy(() => import('./pages/Reports/ReportsShell').then(m => ({ default: m.ReportsShell })));
+const ReportsMonitor = lazy(() => import('./pages/Reports/Monitor').then(m => ({ default: m.Monitor })));
+const ReportsOpiu = lazy(() => import('./pages/Reports/Opiu').then(m => ({ default: m.Opiu })));
+const ReportsDds = lazy(() => import('./pages/Reports/Dds').then(m => ({ default: m.Dds })));
+const ReportsCash = lazy(() => import('./pages/Reports/Cash').then(m => ({ default: m.Cash })));
 const ImportPage = lazy(() => import('./pages/Import/ImportPage').then(m => ({ default: m.ImportPage })));
 const CashflowPage = lazy(() => import('./pages/Finance/CashflowPage').then(m => ({ default: m.CashflowPage })));
+const CashPage = lazy(() => import('./pages/Finance/CashPage').then(m => ({ default: m.CashPage })));
 const PnLPage = lazy(() => import('./pages/Finance/PnLPage').then(m => ({ default: m.PnLPage })));
 const TransactionsPage = lazy(() => import('./pages/Finance/TransactionsPage').then(m => ({ default: m.TransactionsPage })));
 const FinanceDashboard = lazy(() => import('./pages/Finance/FinanceDashboard').then(m => ({ default: m.FinanceDashboard })));
@@ -59,6 +65,7 @@ function PWALoader() {
   );
 }
 
+// Директор (учредитель) с главной сразу попадает в отчёты
 // Loading for main app
 function AppLoader() {
   return (
@@ -134,6 +141,24 @@ function App() {
               }
             />
 
+            {/* Отчёты ОПиУ / ДДС для учредителей — своя оболочка по дизайну */}
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<AppLoader />}>
+                    <ReportsShell />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Suspense fallback={<AppLoader />}><ReportsMonitor /></Suspense>} />
+              <Route path="pnl" element={<Suspense fallback={<AppLoader />}><ReportsOpiu /></Suspense>} />
+              <Route path="dds" element={<Suspense fallback={<AppLoader />}><ReportsDds /></Suspense>} />
+              <Route path="cash" element={<Suspense fallback={<AppLoader />}><ReportsCash /></Suspense>} />
+              <Route path="import" element={<Suspense fallback={<AppLoader />}><ImportPage /></Suspense>} />
+            </Route>
+
             {/* Основное приложение с Layout - защищённое */}
             <Route
               path="/"
@@ -147,18 +172,11 @@ function App() {
                 index
                 element={
                   <Suspense fallback={<AppLoader />}>
-                    <MobileExecutiveDashboard />
+                    <Navigate to="/reports" replace />
                   </Suspense>
                 }
               />
-              <Route
-                path="import"
-                element={
-                  <Suspense fallback={<AppLoader />}>
-                    <ImportPage />
-                  </Suspense>
-                }
-              />
+              <Route path="import" element={<Navigate to="/reports/import" replace />} />
               <Route
                 path="projects"
                 element={
@@ -214,7 +232,7 @@ function App() {
                 } />
                 <Route
                   path="import"
-                  element={<Navigate to="/import" replace />}
+                  element={<Navigate to="/reports/import" replace />}
                 />
                 <Route
                   path="planning"
@@ -245,6 +263,14 @@ function App() {
                   element={
                     <Suspense fallback={<AppLoader />}>
                       <CashflowPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="cash"
+                  element={
+                    <Suspense fallback={<AppLoader />}>
+                      <CashPage />
                     </Suspense>
                   }
                 />

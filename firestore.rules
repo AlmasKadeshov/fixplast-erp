@@ -38,6 +38,23 @@ service cloud.firestore {
     }
 
     // ============================================
+    // ОТЧЁТЫ ОПиУ / ДДС (данные импорта из Google Sheets)
+    // Читать могут только те, кого добавили в reportViewers (документ с id = email),
+    // и супер-админы. Писать (импортировать) — только супер-админы.
+    // ============================================
+    function isReportViewer() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/reportViewers/$(request.auth.token.email));
+    }
+    match /reportData/{docId} {
+      allow read: if isSuperAdmin() || isReportViewer();
+      allow write: if isSuperAdmin();
+    }
+    match /reportViewers/{email} {
+      allow read: if isSuperAdmin() || (isAuthenticated() && request.auth.token.email == email);
+      allow write: if isSuperAdmin();
+    }
+
+    // ============================================
     // ПРОЕКТЫ
     // ============================================
     match /projects/{projectId} {
