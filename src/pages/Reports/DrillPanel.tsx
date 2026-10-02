@@ -1,11 +1,12 @@
+import { useEffect } from 'react';
 import type { DrillOp } from '../../services/reports';
 import { MONO } from './ui';
 import { money } from './format';
 
 const dateFmt = new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: '2-digit', timeZone: 'Asia/Almaty' });
 
-export function DrillPanel({ title, amountLabel, ops, note, onClose }: {
-  title: string; amountLabel: string; ops: DrillOp[]; note?: string; onClose: () => void;
+export function DrillPanel({ title, amountLabel, ops, note, onClose, bare }: {
+  title: string; amountLabel: string; ops: DrillOp[]; note?: string; onClose: () => void; bare?: boolean;
 }) {
   const shown = ops.slice(0, 40);
   return (
@@ -18,13 +19,13 @@ export function DrillPanel({ title, amountLabel, ops, note, onClose }: {
           <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: '#64748b' }}>Расшифровка</div>
           <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: '-.2px' }}>{title}</div>
         </div>
-        <button type="button" onClick={onClose} aria-label="Закрыть" style={{
+        {!bare && <button type="button" onClick={onClose} aria-label="Закрыть" style={{
           marginLeft: 'auto', border: '1px solid #e2e8f0', background: '#fff', borderRadius: 8, width: 26, height: 26,
           cursor: 'pointer', color: '#64748b', fontSize: 14, lineHeight: 1,
-        }}>×</button>
+        }}>×</button>}
       </div>
       <div style={{ fontFamily: MONO, fontSize: 20, fontWeight: 700, color: '#2563eb', marginBottom: 12 }}>{amountLabel}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', maxHeight: 420, overflowY: 'auto' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', maxHeight: bare ? '56vh' : 420, overflowY: 'auto' }}>
         {shown.length === 0 && <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600, padding: '8px 0' }}>Нет операций — сумма берётся из помесячных листов (ЗП, коммунальные, продажи).</div>}
         {shown.map((o, i) => (
           <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'baseline', padding: '9px 0', borderTop: '1px solid #eef2f7' }}>
@@ -39,6 +40,26 @@ export function DrillPanel({ title, amountLabel, ops, note, onClose }: {
       </div>
       {ops.length > shown.length && <div style={{ marginTop: 10, fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>Показаны крупнейшие {shown.length} из {ops.length}</div>}
       {note && <div style={{ marginTop: 10, fontSize: 10.5, color: '#94a3b8', fontWeight: 600 }}>{note}</div>}
+    </div>
+  );
+}
+
+/** Всплывающее окно с расшифровкой: закрывается кликом вне окна или клавишей Esc */
+export function DrillModal(props: { title: string; amountLabel: string; ops: DrillOp[]; note?: string; onClose: () => void }) {
+  const { onClose } = props;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(15,23,42,.45)', backdropFilter: 'blur(2px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, animation: 'fp-fade .15s ease',
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 640, boxShadow: '0 30px 70px -30px rgba(15,23,42,.7)', borderRadius: 16 }}>
+        <DrillPanel {...props} bare />
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // Разбор листов Google Sheets (как их отдаёт xlsx с raw:true, cellDates:true) в типы отчётов.
 // Используется и импортом в приложении, и тестовой сверкой с эталонными листами.
 import type {
-  BankOp, CashOp, SaleRow, ReportSettings, BankBalance, ProductCostRow, MaterialPrices, MaterialSplit, FixedAssetAmort,
+  BankOp, CashOp, SaleRow, ReportSettings, BankBalance, ProductCostRow, MaterialPrices, MaterialSplit, FixedAssetAmort, StaffRow,
 } from './types';
 import { normalizePeriod, excelSerialToDate } from './dates';
 
@@ -214,9 +214,21 @@ export function parseWalletInitial(rows: Row[]): Record<string, number> {
   return out;
 }
 
+/** «ОФИС_ЗП_данные»: № | Сотрудники | Оклад по неофиц. | Оклад офиц. | Оклад (итого) */
+export function parseStaff(rows: Row[]): StaffRow[] {
+  const out: StaffRow[] = [];
+  for (const r of rows.slice(1)) {
+    const name = str(r[1]);
+    if (!name) continue;
+    const unofficial = toNum(r[2]), official = toNum(r[3]);
+    out.push({ no: toNum(r[0]), name, unofficial, official, total: toNum(r[4]) || unofficial + official });
+  }
+  return out;
+}
+
 export function buildSettings(sheets: {
   cost: Row[]; prices: Row[]; zpProd: Row[]; zpOffice: Row[]; bonuses: Row[]; utilities: Row[]; assets: Row[];
-  balances?: Row[]; wallets?: Row[];
+  balances?: Row[]; wallets?: Row[]; staff?: Row[];
 }): ReportSettings {
   const c = parseCostSheet(sheets.cost);
   return {
@@ -229,5 +241,6 @@ export function buildSettings(sheets: {
     assets: parseAssets(sheets.assets),
     bankBalances: sheets.balances ? parseBankBalances(sheets.balances) : [],
     walletInitial: sheets.wallets ? parseWalletInitial(sheets.wallets) : {},
+    staff: sheets.staff ? parseStaff(sheets.staff) : [],
   };
 }

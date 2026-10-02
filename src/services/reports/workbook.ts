@@ -8,7 +8,7 @@ export const REQUIRED_SHEETS = [
   'Журнал_Банк', 'Сделки', 'Продажи_1С', 'Продажи_1С_физлица', 'Себестоимость', 'Цены_Сырья_История',
   'ЗП_Производство', 'ЗП_Офис', 'Бонусы_Менеджеры', 'Коммунальные_Завод', 'ОС_справочник', 'Остатки',
 ] as const;
-export const OPTIONAL_SHEETS = ['Кошельки'] as const;
+export const OPTIONAL_SHEETS = ['Кошельки', 'ОФИС_ЗП_данные'] as const;
 
 /**
  * ВРЕМЕННО. Начальные остатки кошельков живут в отдельной таблице кассы (лист «Кошельки»),
@@ -45,6 +45,7 @@ export function parseReportWorkbook(buffer: ArrayBuffer): ParsedWorkbook {
     cost: sheet('Себестоимость'), prices: sheet('Цены_Сырья_История'), zpProd: sheet('ЗП_Производство'),
     zpOffice: sheet('ЗП_Офис'), bonuses: sheet('Бонусы_Менеджеры'), utilities: sheet('Коммунальные_Завод'),
     assets: sheet('ОС_справочник'), balances: sheet('Остатки'), wallets: has('Кошельки') ? sheet('Кошельки') : undefined,
+    staff: has('ОФИС_ЗП_данные') ? sheet('ОФИС_ЗП_данные') : undefined,
   });
   const usedWalletFallback = !has('Кошельки');
   if (usedWalletFallback) settings.walletInitial = { ...WALLET_INITIAL_FALLBACK };

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
 import { useDropzone } from 'react-dropzone';
 import { AlertTriangle, CheckCircle, FileSpreadsheet, Info, Loader2, XCircle } from 'lucide-react';
 import { useAuth } from '../../contexts';
 import {
-  addViewer, invalidateReportData, listViewers, parseReportWorkbook, removeViewer, saveReportData, summarize, validateInput,
+  addViewer, invalidateReportData, listViewers, parseOsv1210, parseReportWorkbook, parseTabel, saveProdPayroll, removeViewer, saveReceivables, saveReportData, summarize, validateInput,
   type DataSummary, type Issue, type ParsedWorkbook, type ReportMeta, type Viewer,
 } from '../../services/reports';
 
@@ -23,6 +24,68 @@ function IssueRow({ issue }: { issue: Issue }) {
         {issue.detail && <div className="text-sm text-gray-500 mt-0.5">{issue.detail}</div>}
       </div>
     </li>
+  );
+}
+
+function ReceivablesCard({ user }: { user: string }) {
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const onDrop = useCallback(async (files: File[]) => {
+    const f = files[0];
+    if (!f) return;
+    setBusy(true); setMsg(null);
+    try {
+      const wb = XLSX.read(new Uint8Array(await f.arrayBuffer()), { type: 'array', cellStyles: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '', raw: true });
+      const report = parseOsv1210(rows, (ws['!rows'] ?? []).map(r => r?.level));
+      if (!/1210/.test(report.title) || report.rows.length === 0) throw new Error('Это не ОСВ по счёту 1210: не нашёл строк контрагентов («БУ»).');
+      await saveReceivables(report, { importedBy: user, fileName: f.name });
+      setMsg({ ok: true, text: `Загружено: ${report.rows.length} контрагентов. Откройте раздел «Дебиторка».` });
+    } catch (e) {
+      setMsg({ ok: false, text: e instanceof Error ? e.message : 'Не удалось загрузить' });
+    } finally { setBusy(false); }
+  }, [user]);
+  const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: false, accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] } });
+  return (
+    <div className="rounded-xl bg-white border border-gray-200 p-4">
+      <div className="text-sm font-semibold text-gray-900">Дебиторка из 1С</div>
+      <p className="text-sm text-gray-500 mt-1">Оборотно-сальдовая ведомость по счёту 1210 (по контрагентам), сохранённая в Excel. Для разбивки по менеджерам — с группировкой по менеджерам. Заменяет прошлую загрузку.</p>
+      <div {...getRootProps()} className="mt-3 border border-dashed border-gray-300 rounded-lg p-4 text-center text-sm text-gray-600 cursor-pointer hover:border-blue-400">
+        <input {...getInputProps()} />{busy ? 'Загружаем…' : 'Перетащите .xlsx сюда или нажмите'}
+      </div>
+      {msg && <div className={`mt-2 text-sm ${msg.ok ? 'text-green-700' : 'text-red-600'}`}>{msg.text}</div>}
+    </div>
+  );
+}
+
+function TabelCard({ user }: { user: string }) {
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const onDrop = useCallback(async (files: File[]) => {
+    const f = files[0];
+    if (!f) return;
+    setBusy(true); setMsg(null);
+    try {
+      const wb = XLSX.read(new Uint8Array(await f.arrayBuffer()), { type: 'array' });
+      const data = parseTabel(wb.SheetNames.map(name => ({ name, rows: XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[name], { header: 1, defval: '', raw: true }) })));
+      if (!data.months.length) throw new Error('Не нашёл листов табеля (сентябрь2026, сентябрьИТР26 и т.п.).');
+      await saveProdPayroll(data, { importedBy: user, fileName: f.name });
+      setMsg({ ok: true, text: `Загружено месяцев: ${data.months.length} (${data.months[0].month} … ${data.months[data.months.length - 1].month}). Откройте «Зарплата» → «Производство».` });
+    } catch (e) {
+      setMsg({ ok: false, text: e instanceof Error ? e.message : 'Не удалось загрузить' });
+    } finally { setBusy(false); }
+  }, [user]);
+  const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: false, accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] } });
+  return (
+    <div className="rounded-xl bg-white border border-gray-200 p-4">
+      <div className="text-sm font-semibold text-gray-900">Табель производства</div>
+      <p className="text-sm text-gray-500 mt-1">Файл «ТАБЕЛ2026.xlsx»: листы по месяцам (рабочие) и листы ИТР. Заменяет прошлую загрузку табеля.</p>
+      <div {...getRootProps()} className="mt-3 border border-dashed border-gray-300 rounded-lg p-4 text-center text-sm text-gray-600 cursor-pointer hover:border-blue-400">
+        <input {...getInputProps()} />{busy ? 'Загружаем…' : 'Перетащите .xlsx сюда или нажмите'}
+      </div>
+      {msg && <div className={`mt-2 text-sm ${msg.ok ? 'text-green-700' : 'text-red-600'}`}>{msg.text}</div>}
+    </div>
   );
 }
 
@@ -205,6 +268,8 @@ export function ImportPage() {
         </>
       )}
 
+      {appUser?.role === 'owner' && <ReceivablesCard user={appUser.email || ''} />}
+      {appUser?.role === 'owner' && <TabelCard user={appUser.email || ''} />}
       {appUser?.role === 'owner' && <ViewersCard adder={appUser.email || ''} />}
     </div>
   );

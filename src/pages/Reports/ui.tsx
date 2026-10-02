@@ -1,8 +1,9 @@
 // Общие блоки дизайна FixPlast (inline-стили 1-в-1 из макета FixPlast.dc.html).
 import type { CSSProperties, ReactNode } from 'react';
 
-export const MONO = "'JetBrains Mono', monospace";
-export const FONT = "Manrope, system-ui, sans-serif";
+// Century Gothic — основной шрифт; если его нет на устройстве, подставляется Jost (похож, есть кириллица и жирные начертания)
+export const FONT = "'Century Gothic', 'Jost', 'Didact Gothic', system-ui, sans-serif";
+export const MONO = FONT; // цифры тем же шрифтом, выравнивание — через tabular-nums
 
 export const card: CSSProperties = {
   background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16,

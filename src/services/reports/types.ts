@@ -71,7 +71,12 @@ export interface ReportSettings {
   bankBalances: BankBalance[];
   /** Начальные остатки кошельков (лист «Кошельки» из отдельной таблицы кассы) */
   walletInitial: Record<string, number>;
+  /** Сотрудники офиса с окладами (лист «ОФИС_ЗП_данные»), может отсутствовать в старых загрузках */
+  staff?: StaffRow[];
 }
+
+/** Лист «ОФИС_ЗП_данные»: сотрудники офиса и оклады */
+export interface StaffRow { no: number; name: string; unofficial: number; official: number; total: number }
 
 export interface BankBalance { company: string; currency: string; bank: string; amount: number }
 

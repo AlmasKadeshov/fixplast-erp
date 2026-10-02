@@ -14,6 +14,7 @@ import {
     Landmark,
     Banknote,
     CreditCard,
+    Wallet,
     Shield,
     Menu,
     X,
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 import { collection, onSnapshot, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { useAuth } from '../../contexts/AuthContext';
 import { useAccountBalances } from '../../hooks/useAccountBalances';
 import { financeService } from '../../services/finance.service';
 import { AccountType } from '../../models/account';
@@ -38,10 +40,11 @@ const ACCOUNT_TYPE_ICONS: Record<AccountType, typeof Landmark> = {
     crypto: BarChart3,
 };
 
-// Навигационные вкладки
+// Навигационные вкладки (ownerOnly — личные разделы владельца)
 const navTabs = [
     { label: 'Дашборд', path: '/finance', icon: LayoutDashboard, exact: true },
     { label: 'Журнал', path: '/finance/transactions', icon: FileText },
+    { label: 'Касса', path: '/finance/cash', icon: Wallet, ownerOnly: true },
     { label: 'Календарь', path: '/finance/calendar', icon: Calendar },
     { label: 'Аналитика', path: '/finance/analytics', icon: BarChart3 },
     { label: 'Импорт', path: '/finance/import', icon: Upload },
@@ -49,7 +52,7 @@ const navTabs = [
     { label: 'Авто-правила', path: '/finance/auto-rules', icon: Zap },
 ];
 
-function isTabActive(tab: typeof navTabs[0], pathname: string): boolean {
+function isTabActive(tab: (typeof navTabs)[number], pathname: string): boolean {
     if (tab.exact) return pathname === tab.path;
     return pathname.startsWith(tab.path);
 }
@@ -57,6 +60,7 @@ function isTabActive(tab: typeof navTabs[0], pathname: string): boolean {
 export function FinanceLayout() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { appUser } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [modalTab, setModalTab] = useState<TransactionType | null>(null);
     const [overdueCount, setOverdueCount] = useState(0);
@@ -64,6 +68,11 @@ export function FinanceLayout() {
 
     const { balances, futurePayments, loading: balancesLoading } = useAccountBalances();
     const [cashFromDDS, setCashFromDDS] = useState(0);
+
+    // Личные разделы (Касса) видит только владелец
+    const visibleTabs = navTabs.filter(
+        tab => !('ownerOnly' in tab && tab.ownerOnly) || appUser?.role === 'owner'
+    );
 
     // Load DDS cash balance (all bank income - expense)
     useEffect(() => {
@@ -276,7 +285,7 @@ export function FinanceLayout() {
                 {/* Навигация (горизонтальные вкладки) */}
                 <div className="border-b border-gray-200 bg-white px-4 flex-shrink-0">
                     <nav className="-mb-px flex items-center gap-1 overflow-x-auto" aria-label="Finance tabs">
-                        {navTabs.map((tab) => {
+                        {visibleTabs.map((tab) => {
                             const Icon = tab.icon;
                             const active = isTabActive(tab, location.pathname);
 

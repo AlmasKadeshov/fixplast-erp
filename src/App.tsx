@@ -23,6 +23,9 @@ const ReportsShell = lazy(() => import('./pages/Reports/ReportsShell').then(m =>
 const ReportsMonitor = lazy(() => import('./pages/Reports/Monitor').then(m => ({ default: m.Monitor })));
 const ReportsOpiu = lazy(() => import('./pages/Reports/Opiu').then(m => ({ default: m.Opiu })));
 const ReportsDds = lazy(() => import('./pages/Reports/Dds').then(m => ({ default: m.Dds })));
+const ReportsMargins = lazy(() => import('./pages/Reports/Margins').then(m => ({ default: m.Margins })));
+const ReportsPayroll = lazy(() => import('./pages/Reports/Payroll').then(m => ({ default: m.Payroll })));
+const ReportsReceivables = lazy(() => import('./pages/Reports/Receivables').then(m => ({ default: m.Receivables })));
 const ReportsCash = lazy(() => import('./pages/Reports/Cash').then(m => ({ default: m.Cash })));
 const ImportPage = lazy(() => import('./pages/Import/ImportPage').then(m => ({ default: m.ImportPage })));
 const CashflowPage = lazy(() => import('./pages/Finance/CashflowPage').then(m => ({ default: m.CashflowPage })));
@@ -155,6 +158,9 @@ function App() {
               <Route index element={<Suspense fallback={<AppLoader />}><ReportsMonitor /></Suspense>} />
               <Route path="pnl" element={<Suspense fallback={<AppLoader />}><ReportsOpiu /></Suspense>} />
               <Route path="dds" element={<Suspense fallback={<AppLoader />}><ReportsDds /></Suspense>} />
+              <Route path="receivables" element={<Suspense fallback={<AppLoader />}><ReportsReceivables /></Suspense>} />
+              <Route path="margins" element={<Suspense fallback={<AppLoader />}><ReportsMargins /></Suspense>} />
+              <Route path="payroll" element={<Suspense fallback={<AppLoader />}><ReportsPayroll /></Suspense>} />
               <Route path="cash" element={<Suspense fallback={<AppLoader />}><ReportsCash /></Suspense>} />
               <Route path="import" element={<Suspense fallback={<AppLoader />}><ImportPage /></Suspense>} />
             </Route>

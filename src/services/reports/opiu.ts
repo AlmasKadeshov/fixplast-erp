@@ -5,7 +5,6 @@ import { OPEX_CATEGORY_ORDER, OPIU_EXCLUDED_CATEGORIES, INCOME_CATEGORIES, PERIO
 import { monthKey, monthLabel } from './dates';
 import { extractPackMultiplier, mapProductToCost, PEREKUP_MARK } from './products';
 import { buildCostMaps, calcProductCost } from './cost';
-import { sumAmortForPeriod } from './amortization';
 import { cashExpensesAndIncomes, perekupByMonth } from './cashOps';
 
 export interface OpiuResult {
@@ -146,10 +145,8 @@ export function buildOpiu(input: ReportInput, opts: OpiuOptions = {}): OpiuResul
   rows.push(...opexRows);
   rows.push(line('opexTotal', 'Итого операционные расходы', opexTotal, 'total'));
 
-  const amort = months.map(m => -sumAmortForPeriod(settings.assets, m));
-  if (sum(amort) !== 0) rows.push(line('amort', 'Амортизация ОС', amort));
-
-  const op = months.map((_, i) => gp[i] + opexTotal[i] + amort[i]);
+  // Амортизация ОС в ОПиУ не учитывается (решение учредителей, 02.10.2026): прибыль считается до амортизации.
+  const op = months.map((_, i) => gp[i] + opexTotal[i]);
   const opTotal = sum(op);
   rows.push(line('operatingProfit', 'ОПЕРАЦИОННАЯ ПРИБЫЛЬ', op, 'subtotal'));
   rows.push({

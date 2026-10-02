@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { drillOperations, topProducts, type ReportRow } from '../../services/reports';
 import { Donut } from './charts';
-import { DrillPanel } from './DrillPanel';
+import { DrillModal } from './DrillPanel';
 import { card, CardTitle, Empty, MONO, num, th } from './ui';
 import { mln, monthFull, money, pct, sum } from './format';
 import { opiuRow, useReports } from './ReportsContext';
@@ -103,9 +103,8 @@ export function Opiu() {
               </tr>
               {opexRows.map(r => <Row key={r.key} r={r} />)}
               <Row r={R('opexTotal')} bold style={{ background: '#f8fafc' }} />
-              {opiu.rows.find(r => r.key === 'amort') && <Row r={R('amort')} />}
               <tr style={{ borderTop: '2px solid #0f172a', background: '#eff6ff' }}>
-                <td style={{ padding: '12px 20px', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', position: 'sticky', left: 0, background: '#eff6ff' }}>Операционная прибыль</td>
+                <td style={{ padding: '12px 20px', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', position: 'sticky', left: 0, background: '#eff6ff' }}>Операционная прибыль <span style={{ fontSize: 10.5, fontWeight: 600, color: '#64748b' }}>(без амортизации)</span></td>
                 {R('operatingProfit').values.map((v, i) => <td key={i} style={{ ...td, padding: '12px', fontWeight: 700, fontSize: 13, color: '#1d4ed8' }}>{mln(v)}</td>)}
                 <td style={{ ...td, padding: '12px 20px 12px 12px', fontWeight: 700, fontSize: 13, color: '#1d4ed8' }}>{mln(R('operatingProfit').total)}</td>
               </tr>
@@ -141,13 +140,13 @@ export function Opiu() {
         </div>
 
         {drill && (
-          <DrillPanel
+          <DrillModal
             title={`${drill.row.label} · ${monthFull(opiu.months[drill.mi])}`}
             amountLabel={`${money(drill.row.values[drill.mi])} ₸`} ops={drillOps} onClose={() => setDrill(null)}
           />
         )}
         {sliceRow && sliceOps && (
-          <DrillPanel
+          <DrillModal
             title={`${sliceRow.label} · ${monthFull(month)}`} amountLabel={`${money(-sliceRow.value)} ₸`} ops={sliceOps}
             note={slice === 'costRaw' ? 'Сырьё считается по составу изделий и ценам сырья за месяц, а не по отдельным платежам.' : undefined}
             onClose={() => setSlice(null)}

@@ -4,14 +4,15 @@ import { useAuth } from '../../contexts';
 import { ReportsProvider, useReports } from './ReportsContext';
 import { Empty, FONT, MONO } from './ui';
 
-const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap';
+const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Didact+Gothic&family=Jost:wght@400;500;600;700&display=swap';
 
 const CSS = `
-.fp-root{min-height:100vh;display:flex;align-items:stretch;background:#eef2f7;color:#0f172a;font-family:${FONT};-webkit-font-smoothing:antialiased}
+.fp-root{min-height:100vh;display:flex;align-items:stretch;background:#eef2f7;color:#0f172a;font-family:${FONT};font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .fp-root *{box-sizing:border-box}
 .fp-nav a{display:flex;align-items:center;gap:10px;width:100%;border-radius:10px;padding:9px 10px;font-size:12.5px;font-weight:600;color:#94a3b8;text-decoration:none}
 .fp-nav a:hover{background:#1e293b;color:#fff}
 .fp-nav a.active{background:#1e293b;color:#fff;font-weight:700;box-shadow:inset 3px 0 0 #3b82f6}
+@keyframes fp-fade{from{opacity:0}to{opacity:1}}
 @keyframes fp-slide{from{transform:translateX(24px);opacity:0}to{transform:translateX(0);opacity:1}}
 @media (max-width:900px){
   .fp-root{flex-direction:column}
@@ -29,6 +30,9 @@ const TITLES: Record<string, { title: string; sub: string }> = {
   '/reports': { title: 'Монитор', sub: 'Главные показатели компании' },
   '/reports/pnl': { title: 'ОПиУ', sub: 'Выручка и себестоимость по начислению, опер. расходы по факту оплаты' },
   '/reports/dds': { title: 'ДДС', sub: 'Движение денег: банк + касса' },
+  '/reports/receivables': { title: 'Дебиторка', sub: 'Кто должен компании и как растёт долг' },
+  '/reports/margins': { title: 'Маржинальность', sub: 'Какие продукты выгодно продавать' },
+  '/reports/payroll': { title: 'Зарплата', sub: 'Табель офиса и производства: начислено, выплачено, осталось' },
   '/reports/cash': { title: 'Касса', sub: 'Операции по кошелькам' },
   '/reports/import': { title: 'Импорт данных', sub: 'Загрузка таблицы из Google Sheets' },
 };
@@ -38,7 +42,7 @@ function Body() {
   const { appUser } = useAuth();
   const isOwner = appUser?.role === 'owner';
   const { pathname } = useLocation();
-  if (pathname.endsWith('/import')) return <Outlet />;
+  if (pathname.endsWith('/import') || pathname.endsWith('/receivables')) return <Outlet />;
   if (loading) return <Empty>Загружаем данные…</Empty>;
   if (error) {
     const denied = /permission|insufficient/i.test(error);
@@ -87,6 +91,9 @@ function Shell() {
           <NavLink to="/reports" end><span style={{ width: 18, textAlign: 'center' }}>◧</span>Монитор</NavLink>
           <NavLink to="/reports/pnl"><span style={{ width: 18, textAlign: 'center' }}>▤</span>ОПиУ</NavLink>
           <NavLink to="/reports/dds"><span style={{ width: 18, textAlign: 'center' }}>⇄</span>ДДС</NavLink>
+          <NavLink to="/reports/receivables"><span style={{ width: 18, textAlign: 'center' }}>◔</span>Дебиторка</NavLink>
+          <NavLink to="/reports/margins"><span style={{ width: 18, textAlign: 'center' }}>%</span>Маржинальность</NavLink>
+          <NavLink to="/reports/payroll"><span style={{ width: 18, textAlign: 'center' }}>☷</span>Зарплата</NavLink>
           {isOwner && (
             <>
               <div className="fp-sec" style={{ padding: '18px 8px 8px', fontSize: 10, fontWeight: 700, letterSpacing: '.7px', textTransform: 'uppercase', color: '#64748b', borderTop: '1px solid #1e293b', marginTop: 10 }}>Личное</div>

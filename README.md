@@ -41,6 +41,24 @@ npm run seed
 | Зарплата | `src/pages/Finance/PayrollPage.tsx` |
 | Транзакции | `src/pages/Finance/TransactionsPage.tsx` |
 
+## Составные индексы Firestore
+
+Определены в `firestore.indexes.json`. Деплой:
+
+```bash
+firebase deploy --only firestore:indexes
+```
+
+Одиночные поля Firestore индексирует автоматически — здесь только комбинации
+`where(...) + orderBy(...)` по разным полям, которым нужен составной индекс.
+
+| Индекс (коллекция `transactions`) | Какой запрос обслуживает |
+|---|---|
+| `status ASC, date ASC` | `MobileExecutiveDashboard.tsx:145` (`loadMonthlyFlow`), `AccountStatementPage.tsx:75` |
+| `status ASC, date DESC` | `MobileExecutiveDashboard.tsx:186` (`loadRecentTransactions`), `FinanceLayout.tsx:97` (просроченные), `financeService.getTransactions({ status })` |
+| `sourceType ASC, date ASC` | `financeService.getHashesForPeriod` и `reconcileWithFile` (сверка выписок) |
+| `projectId ASC, date DESC` | `financeService.getByProject` → `ProjectDetail.tsx:315` |
+
 ## Переменные окружения
 
 Скопируй `.env.example` в `.env.local`. Для разработки с эмулятором значения уже заполнены.

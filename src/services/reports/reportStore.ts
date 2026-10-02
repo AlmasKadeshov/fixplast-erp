@@ -2,11 +2,16 @@
 // Операции лежат пачками по CHUNK строк в одном документе коллекции `reportData`
 // (≈25 чтений на открытие отчёта вместо ~11 тысяч), настройки — отдельным документом.
 // Импорт всегда заменяет данные целиком: источник правды — таблица.
-import { collection, doc, getDocs, writeBatch } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import type { BankOp, CashOp, ReportInput, ReportSettings, SaleRow } from './types';
+import { DEFAULT_RELATED, type ArReport } from './receivables';
+import type { ProdPayroll } from './payrollProd';
 
 const COL = 'reportData';
+const AR_DOC = 'receivables';
+const RELATED_DOC = 'related';
+const PROD_DOC = 'payrollProd';
 const CHUNK = 400;
 
 export interface ReportMeta {
@@ -33,6 +38,7 @@ function unpackSettings(p: Packed): ReportSettings {
     assets: (s.assets || []).map(a => ({ amort: a.amort, date: a.date ? new Date(a.date) : null })),
     bankBalances: s.bankBalances || [],
     walletInitial: s.walletInitial || {},
+    staff: s.staff || [],
   };
 }
 
@@ -70,7 +76,8 @@ export async function saveReportData(
   docs.push({ id: 'meta', data: { ...meta } });
 
   // Сначала записываем новое, потом удаляем лишние старые пачки (если строк стало меньше)
-  const keep = new Set(docs.map(d => d.id));
+  // дебиторка и список «своих компаний» живут отдельно и при импорте таблицы не удаляются
+  const keep = new Set([...docs.map(d => d.id), AR_DOC, RELATED_DOC, PROD_DOC]);
   const total = docs.length;
   let done = 0;
   onProgress?.(0, total);
@@ -109,4 +116,44 @@ export async function loadReportData(): Promise<(ReportInput & { meta: ReportMet
   }
   if (!settings) return null;
   return { bank, cash, sales, settings, meta };
+}
+
+export interface StoredAr { report: ArReport; importedAt: number; importedBy: string; fileName: string }
+
+export async function saveReceivables(report: ArReport, info: { importedBy: string; fileName: string }): Promise<void> {
+  const data: StoredAr = { report, importedAt: Date.now(), importedBy: info.importedBy, fileName: info.fileName };
+  const batch = writeBatch(db);
+  batch.set(doc(db, COL, AR_DOC), data as unknown as Record<string, unknown>);
+  await withTimeout(batch.commit(), 'запись дебиторки');
+}
+
+export async function loadReceivables(): Promise<{ ar: StoredAr | null; related: string[] }> {
+  const snap = await getDocs(collection(db, COL));
+  let ar: StoredAr | null = null;
+  let related: string[] = DEFAULT_RELATED;
+  snap.docs.forEach(d => {
+    if (d.id === AR_DOC) ar = d.data() as StoredAr;
+    if (d.id === RELATED_DOC && Array.isArray(d.data().names)) related = d.data().names as string[];
+  });
+  return { ar, related };
+}
+
+export async function saveRelated(names: string[]): Promise<void> {
+  const batch = writeBatch(db);
+  batch.set(doc(db, COL, RELATED_DOC), { names });
+  await withTimeout(batch.commit(), 'запись списка своих компаний');
+}
+
+export interface StoredProdPayroll { data: ProdPayroll; importedAt: number; importedBy: string; fileName: string }
+
+export async function saveProdPayroll(data: ProdPayroll, info: { importedBy: string; fileName: string }): Promise<void> {
+  const stored: StoredProdPayroll = { data, importedAt: Date.now(), importedBy: info.importedBy, fileName: info.fileName };
+  const batch = writeBatch(db);
+  batch.set(doc(db, COL, PROD_DOC), stored as unknown as Record<string, unknown>);
+  await withTimeout(batch.commit(), 'запись табеля производства');
+}
+
+export async function loadProdPayroll(): Promise<StoredProdPayroll | null> {
+  const snap = await getDoc(doc(db, COL, PROD_DOC));
+  return snap.exists() ? (snap.data() as StoredProdPayroll) : null;
 }
