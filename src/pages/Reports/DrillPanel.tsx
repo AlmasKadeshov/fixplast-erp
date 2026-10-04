@@ -53,7 +53,7 @@ export function DrillModal(props: { title: string; amountLabel: string; ops: Dri
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
   return (
-    <div onClick={onClose} style={{
+    <div onClick={onClose} className="fp-modal-wrap" style={{
       position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(15,23,42,.45)', backdropFilter: 'blur(2px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, animation: 'fp-fade .15s ease',
     }}>

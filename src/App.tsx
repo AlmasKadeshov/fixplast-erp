@@ -26,6 +26,7 @@ const ReportsDds = lazy(() => import('./pages/Reports/Dds').then(m => ({ default
 const ReportsMargins = lazy(() => import('./pages/Reports/Margins').then(m => ({ default: m.Margins })));
 const ReportsPayroll = lazy(() => import('./pages/Reports/Payroll').then(m => ({ default: m.Payroll })));
 const ReportsReceivables = lazy(() => import('./pages/Reports/Receivables').then(m => ({ default: m.Receivables })));
+const ReportsCollections = lazy(() => import('./pages/Reports/Collections').then(m => ({ default: m.Collections })));
 const ReportsCash = lazy(() => import('./pages/Reports/Cash').then(m => ({ default: m.Cash })));
 const ImportPage = lazy(() => import('./pages/Import/ImportPage').then(m => ({ default: m.ImportPage })));
 const CashflowPage = lazy(() => import('./pages/Finance/CashflowPage').then(m => ({ default: m.CashflowPage })));
@@ -161,6 +162,7 @@ function App() {
               <Route path="receivables" element={<Suspense fallback={<AppLoader />}><ReportsReceivables /></Suspense>} />
               <Route path="margins" element={<Suspense fallback={<AppLoader />}><ReportsMargins /></Suspense>} />
               <Route path="payroll" element={<Suspense fallback={<AppLoader />}><ReportsPayroll /></Suspense>} />
+              <Route path="collections" element={<Suspense fallback={<AppLoader />}><ReportsCollections /></Suspense>} />
               <Route path="cash" element={<Suspense fallback={<AppLoader />}><ReportsCash /></Suspense>} />
               <Route path="import" element={<Suspense fallback={<AppLoader />}><ImportPage /></Suspense>} />
             </Route>

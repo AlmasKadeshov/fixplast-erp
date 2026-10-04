@@ -47,7 +47,7 @@ function PayrollOffice() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 14 }}>
+      <div className="fp-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 14 }}>
         {kpis.map(k => (
           <div key={k.label} style={{ ...card, borderRadius: 14, padding: '16px 17px' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', letterSpacing: '.3px', textTransform: 'uppercase' }}>{k.label}</div>

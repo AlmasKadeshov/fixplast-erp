@@ -15,3 +15,4 @@ export * from './flows';
 export * from './receivables';
 export * from './payrollProd';
 export * from './margins';
+export { buildCollections, buildCashCycle, PAYMENT_CATEGORY, REFUND_CATEGORY, type CollectionsResult, type CashCycleResult } from './collections';

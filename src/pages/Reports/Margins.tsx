@@ -81,7 +81,7 @@ export function Margins() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14 }}>
+      <div className="fp-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14 }}>
         {kpis.map(k => (
           <div key={k.label} style={{ ...card, borderRadius: 14, padding: '16px 17px' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', letterSpacing: '.3px', textTransform: 'uppercase' }}>{k.label}</div>
@@ -106,7 +106,7 @@ export function Margins() {
           const rows = [...g.rows].sort((a, b) => (sort === 'margin' ? b.margin - a.margin : (b.marginPct ?? -999) - (a.marginPct ?? -999)));
           return (
             <div key={g.name} style={{ borderTop: '1px solid #eef2f7' }}>
-              <div onClick={() => setOpen(isOpen ? null : g.name)} style={{ display: 'grid', gridTemplateColumns: 'minmax(210px,1.4fr) minmax(160px,1.6fr) 120px 90px 140px', gap: 14, alignItems: 'center', padding: '14px 20px', cursor: 'pointer', background: isOpen ? '#f8fafc' : undefined }}>
+              <div onClick={() => setOpen(isOpen ? null : g.name)} className="fp-mrow" style={{ display: 'grid', gridTemplateColumns: 'minmax(210px,1.4fr) minmax(160px,1.6fr) 120px 90px 140px', gap: 14, alignItems: 'center', padding: '14px 20px', cursor: 'pointer', background: isOpen ? '#f8fafc' : undefined }}>
                 <div style={{ fontWeight: 800, fontSize: 14.5, color: '#0f172a' }}><span style={{ color: '#94a3b8', marginRight: 6 }}>{isOpen ? '▾' : '▸'}</span>{noEmoji(g.name)}
                   <div style={{ fontSize: 11.5, color: '#94a3b8', fontWeight: 600, marginLeft: 18 }}>{g.rows.length} позиций · {pct((g.revenue / t.revenue) * 100, 0)} выручки</div>
                 </div>

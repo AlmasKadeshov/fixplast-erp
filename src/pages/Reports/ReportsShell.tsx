@@ -22,8 +22,28 @@ const CSS = `
   .fp-aside .fp-nav a{width:auto;white-space:nowrap}
   .fp-aside .fp-sec{display:none!important}
   .fp-grid-2{grid-template-columns:minmax(0,1fr)!important}
-  .fp-main-pad{padding:16px 14px 40px!important}
+  .fp-main-pad{padding:14px 12px 40px!important}
+  .fp-aside{position:sticky;top:0;z-index:20;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .fp-aside::-webkit-scrollbar{display:none}
+  .fp-aside .fp-nav a{padding:10px 12px;font-size:13px}
+  .fp-aside .fp-brand div div:last-child{display:none}
+  .fp-root header{padding:10px 14px!important;gap:8px!important}
+  .fp-root header > div:last-child{margin-left:0!important;width:100%;justify-content:space-between}
+  .fp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  .fp-kpis > div{padding:13px 13px!important}
+  .fp-root input,.fp-root select{font-size:16px!important;min-width:0!important}
+  .fp-root table{font-size:12px!important}
+  .fp-root td,.fp-root th{padding:8px 9px!important}
+  .fp-root tr > :first-child:not([colspan]){position:sticky;left:0;z-index:1;background-color:#fff;white-space:normal!important;min-width:112px;max-width:150px;box-shadow:1px 0 0 #e2e8f0}
+  .fp-root thead tr > :first-child{background-color:#f8fafc;z-index:2}
+  .fp-mrow{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px 12px!important;padding:12px 14px!important}
+  .fp-mrow > :nth-child(2){grid-column:1/-1;grid-row:2}
+  .fp-mrow > :nth-child(5){display:none}
+  .fp-modal-wrap{align-items:flex-end!important;padding:0!important}
+  .fp-modal-wrap > div{max-width:none!important;border-radius:16px 16px 0 0!important;animation:fp-up .22s ease}
+  .fp-modal-wrap > div > div{border-radius:16px 16px 0 0!important;padding-bottom:max(18px,env(safe-area-inset-bottom))!important}
 }
+@keyframes fp-up{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
 `;
 
 const TITLES: Record<string, { title: string; sub: string }> = {
@@ -31,6 +51,7 @@ const TITLES: Record<string, { title: string; sub: string }> = {
   '/reports/pnl': { title: 'ОПиУ', sub: 'Выручка и себестоимость по начислению, опер. расходы по факту оплаты' },
   '/reports/dds': { title: 'ДДС', sub: 'Движение денег: банк + касса' },
   '/reports/receivables': { title: 'Дебиторка', sub: 'Кто должен компании и как растёт долг' },
+  '/reports/collections': { title: 'Реализация — Поступления — ДДС', sub: 'Продали → получили от клиентов → потратили → осталось денег' },
   '/reports/margins': { title: 'Маржинальность', sub: 'Какие продукты выгодно продавать' },
   '/reports/payroll': { title: 'Зарплата', sub: 'Табель офиса и производства: начислено, выплачено, осталось' },
   '/reports/cash': { title: 'Касса', sub: 'Операции по кошелькам' },
@@ -92,6 +113,7 @@ function Shell() {
           <NavLink to="/reports/pnl"><span style={{ width: 18, textAlign: 'center' }}>▤</span>ОПиУ</NavLink>
           <NavLink to="/reports/dds"><span style={{ width: 18, textAlign: 'center' }}>⇄</span>ДДС</NavLink>
           <NavLink to="/reports/receivables"><span style={{ width: 18, textAlign: 'center' }}>◔</span>Дебиторка</NavLink>
+          <NavLink to="/reports/collections"><span style={{ width: 18, textAlign: 'center' }}>⇅</span>Реализация / поступления</NavLink>
           <NavLink to="/reports/margins"><span style={{ width: 18, textAlign: 'center' }}>%</span>Маржинальность</NavLink>
           <NavLink to="/reports/payroll"><span style={{ width: 18, textAlign: 'center' }}>☷</span>Зарплата</NavLink>
           {isOwner && (
